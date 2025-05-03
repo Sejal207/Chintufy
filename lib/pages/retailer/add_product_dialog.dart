@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import '../../services/database_service.dart';
+import '../../services/firebase_storage_service.dart';
 import '../../models/product.dart';
 
 class AddProductDialog extends StatefulWidget {
@@ -20,8 +21,11 @@ class _AddProductDialogState extends State<AddProductDialog> {
   final TextEditingController _stockController = TextEditingController();
   File? _imageFile;
   bool _isUploading = false;
-
+  double _uploadProgress = 0.0;
+  String _uploadStatus = '';
+  
   final ImagePicker _picker = ImagePicker();
+  final FirebaseStorageService _storageService = FirebaseStorageService();
 
   @override
   void dispose() {
@@ -33,32 +37,99 @@ class _AddProductDialogState extends State<AddProductDialog> {
   }
 
   Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await _picker.pickImage(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+    try {
+      final pickedFile = await _picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: ${e.toString()}')),
+      );
     }
   }
 
   Future<String?> _uploadImage() async {
     if (_imageFile == null) return null;
 
-    setState(() => _isUploading = true);
+    setState(() {
+      _isUploading = true;
+      _uploadProgress = 0.0;
+      _uploadStatus = 'Preparing upload...';
+    });
+
+    // Get the storage service from Provider
+    final storageService = Provider.of<FirebaseStorageService>(context, listen: false);
+
     try {
-      final fileName = path.basename(_imageFile!.path);
-      final destination = 'product_images/$fileName';
-
-      final ref = FirebaseStorage.instance.ref(destination);
-      await ref.putFile(_imageFile!);
-
-      final imageUrl = await ref.getDownloadURL();
-      return imageUrl;
+      // Simplify by passing minimal required parameters
+      final imageUrl = await storageService.uploadImage(
+        imageFile: _imageFile!,
+        folderName: 'products', // This will be ignored in our updated service
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              _uploadProgress = progress;
+              _uploadStatus = '${(progress * 100).toStringAsFixed(1)}% uploaded';
+            });
+          }
+        },
+        onError: (errorMsg) {
+          if (mounted) {
+            setState(() {
+              _uploadStatus = 'Error: $errorMsg';
+              _isUploading = false;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Upload error: $errorMsg')),
+            );
+          }
+        },
+      );
+      
+      if (imageUrl != null) {
+        if (mounted) {
+          setState(() {
+            _uploadStatus = 'Upload complete!';
+          });
+        }
+        return imageUrl;
+      } else {
+        throw Exception('Failed to get image URL');
+      }
+    } on PlatformException catch (e) {
+      print('Platform Exception during upload: $e');
+      if (mounted) {
+        setState(() {
+          _uploadStatus = 'Platform error: ${e.message}';
+          _isUploading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Device error: ${e.message}')),
+        );
+      }
+      return null;
     } catch (e) {
-      print('Error uploading image: $e');
+      print('Error in _uploadImage: $e');
+      if (mounted) {
+        setState(() {
+          _uploadStatus = 'Upload failed';
+          _isUploading = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to upload image. Please try again.')),
+        );
+      }
       return null;
     } finally {
-      setState(() => _isUploading = false);
+      if (mounted) {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
@@ -95,6 +166,12 @@ class _AddProductDialogState extends State<AddProductDialog> {
                       : Image.file(_imageFile!, fit: BoxFit.cover),
                 ),
               ),
+              if (_isUploading) ...[
+                SizedBox(height: 8),
+                LinearProgressIndicator(value: _uploadProgress),
+                SizedBox(height: 4),
+                Text(_uploadStatus, style: TextStyle(fontSize: 12)),
+              ],
               SizedBox(height: 16),
               TextFormField(
                 controller: _nameController,
