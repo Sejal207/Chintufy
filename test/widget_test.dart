@@ -7,24 +7,51 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:chintufy/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp(message: 'check', initialized: true,));
+  group('Counter App Widget Tests', () {
+    testWidgets('Counter starts at 0 and increments correctly', 
+      (WidgetTester tester) async {
+      // Build our app and trigger a frame
+      await tester.pumpWidget(
+      MyApp(
+          
+        ),
+      );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // Verify initial state
+      expect(find.text('0'), findsOneWidget);
+      expect(find.text('1'), findsNothing);
+      expect(find.byIcon(Icons.add), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+      // Test increment functionality
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // Verify counter incremented
+      expect(find.text('0'), findsNothing);
+      expect(find.text('1'), findsOneWidget);
+
+      // Test another increment
+      await tester.tap(find.byIcon(Icons.add));
+      await tester.pump();
+
+      // Verify counter incremented again
+      expect(find.text('1'), findsNothing);
+      expect(find.text('2'), findsOneWidget);
+    });
+
+    testWidgets('App initializes with correct message', 
+      (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MyApp(
+        
+        ),
+      );
+
+      // Verify initialization parameters
+      expect(find.text('check'), findsOneWidget);
+    });
   });
 }

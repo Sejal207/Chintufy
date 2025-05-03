@@ -1,0 +1,2 @@
+/home/gaurav/apps/Chintufy/android/app/.cxx/Debug/4w5t2r26/x86/CMakeFiles/edit_cache.dir
+/home/gaurav/apps/Chintufy/android/app/.cxx/Debug/4w5t2r26/x86/CMakeFiles/rebuild_cache.dir

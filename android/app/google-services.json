@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "1060417338481",
-    "project_id": "tuckshop-chintufy",
-    "storage_bucket": "tuckshop-chintufy.firebasestorage.app"
+    "project_number": "919496874293",
+    "project_id": "chintufy-ff510",
+    "storage_bucket": "chintufy-ff510.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1060417338481:android:ecbcebe7dd7f06667e2fd0",
+        "mobilesdk_app_id": "1:919496874293:android:bf9b46db6c73c2790fd47c",
         "android_client_info": {
           "package_name": "com.example.chintufy"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1060417338481-98qekc4ldfms5niekdn413ltbd6bnqai.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAvnIEJuZ6nfuu5YY-SrRQPj3SuTUAZUXc"
+          "current_key": "AIzaSyAdhWhlODoXzvMH4BaMOOuWtXTamm9qOBI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1060417338481-98qekc4ldfms5niekdn413ltbd6bnqai.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
