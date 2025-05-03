@@ -2,35 +2,35 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Request {
   final String id;
+  final String productId;
   final String productName;
-  final String userId;
   final DateTime timestamp;
   final String status;
 
   Request({
     required this.id,
+    required this.productId,
     required this.productName,
-    required this.userId,
     required this.timestamp,
     required this.status,
   });
 
-  factory Request.fromFirestore(Map<String, dynamic> data, String id) {
-    return Request(
-      id: id,
-      productName: data['productName'],
-      userId: data['userId'],
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
-      status: data['status'],
-    );
-  }
-
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toMap() {
     return {
+      'productId': productId,
       'productName': productName,
-      'userId': userId,
-      'timestamp': Timestamp.fromDate(timestamp),
+      'timestamp': timestamp,
       'status': status,
     };
+  }
+
+  factory Request.fromMap(String id, Map<String, dynamic> map) {
+    return Request(
+      id: id,
+      productId: map['productId'],
+      productName: map['productName'],
+      timestamp: (map['timestamp'] as Timestamp).toDate(),
+      status: map['status'],
+    );
   }
 }

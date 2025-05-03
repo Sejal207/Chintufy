@@ -3,7 +3,145 @@ import '../models/cart_item.dart';
 import '../services/database_service.dart';
 import 'package:provider/provider.dart';
 
+
 class CartPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final databaseService = Provider.of<DatabaseService>(context);
+
+    return Scaffold(
+      appBar: AppBar(title: Text('Cart')),
+      body: StreamBuilder<List<CartItem>>(
+        stream: databaseService.cartItems,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('Your cart is empty'));
+          }
+
+          final cartItems = snapshot.data!;
+          final total = cartItems.fold<double>(
+            0,
+            (sum, item) => sum + (item.product.price * item.quantity),
+          );
+
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cartItems.length,
+                  itemBuilder: (context, index) {
+                    final item = cartItems[index];
+                    return ListTile(
+                      leading: item.product.imageUrl.isNotEmpty
+                          ? Image.network(item.product.imageUrl)
+                          : Icon(Icons.image),
+                      title: Text(item.product.name),
+                      subtitle: Text('₹${item.product.price} x ${item.quantity}'),
+                      trailing: Text(
+                        '₹${(item.product.price * item.quantity).toStringAsFixed(2)}',
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total:',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '₹${total.toStringAsFixed(2)}',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _showCheckoutDialog(
+                          context,
+                          cartItems,
+                          databaseService,
+                        ),
+                        child: Text('Checkout'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _showCheckoutDialog(
+    BuildContext context,
+    List<CartItem> items,
+    DatabaseService databaseService,
+  ) {
+    final roomController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Checkout'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: roomController,
+              decoration: InputDecoration(
+                labelText: 'Room Number',
+                hintText: 'Enter your room number',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (roomController.text.isNotEmpty) {
+                await databaseService.placeOrder(
+                  items,
+                  roomController.text,
+                );
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Order placed successfully!')),
+                );
+              }
+            },
+            child: Text('Place Order'),
+          ),
+        ],
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     final databaseService = Provider.of<DatabaseService>(context);
@@ -103,4 +241,3 @@ class CartPage extends StatelessWidget {
       ),
     );
   }
-}

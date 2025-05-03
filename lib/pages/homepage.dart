@@ -6,6 +6,7 @@ import '../widgets/product_card.dart';
 import 'retailer/add_product_dialog.dart';
 import 'cart_page.dart';
 import 'requested_items_page.dart';
+import 'orders_page.dart'; // Ensure this file exists and contains the OrdersPage class
 
 class HomePage extends StatelessWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -48,6 +49,17 @@ class HomePage extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (context) =>  AddProductDialog(),
+              );
+            },
+          ),
+          // Orders button
+          IconButton(
+            icon: Icon(Icons.receipt_long),
+            tooltip: 'Orders',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => OrdersPage()),
               );
             },
           ),

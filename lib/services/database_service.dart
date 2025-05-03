@@ -1,5 +1,6 @@
 import 'package:chintufy/models/cart_item.dart';
 import 'package:chintufy/models/request.dart';
+import 'package:chintufy/models/Orders.dart' as custom;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/product.dart';
 
@@ -43,69 +44,109 @@ class DatabaseService {
     return 'exampleUserId'; // Replace with actual user ID retrieval logic
   }
 
-  // Cart methods
+  // Simplified Cart methods
   Stream<List<CartItem>> get cartItems {
-    return _db
-        .collection('carts')
-        .doc(currentUserId)
-        .collection('items')
-        .snapshots()
-        .map((snapshot) {
+    return _db.collection('cart').snapshots().map((snapshot) {
       return snapshot.docs
-          .map((doc) => CartItem.fromFirestore(doc.data(), doc.id))
+          .map((doc) => CartItem.fromMap(doc.id, doc.data()))
           .toList();
     });
   }
 
-  Future<void> addToCart(String productId, int quantity) async {
-    await _db
-        .collection('carts')
-        .doc(currentUserId)
-        .collection('items')
-        .doc(productId)
-        .set({
-      'productId': productId,
-      'quantity': quantity,
-    });
+  Future<void> addToCart(Product product) async {
+    final cartRef = _db.collection('cart');
+    final existingItem = await cartRef
+        .where('productId', isEqualTo: product.id)
+        .get();
+
+    if (existingItem.docs.isNotEmpty) {
+      final item = CartItem.fromMap(
+          existingItem.docs.first.id, existingItem.docs.first.data());
+      await cartRef.doc(item.id).update({'quantity': item.quantity + 1});
+    } else {
+      await cartRef.add({
+        'productId': product.id,
+        'product': product.toMap(),
+        'quantity': 1,
+      });
+    }
   }
 
+  // Add method to remove item from cart
   Future<void> removeFromCart(String itemId) async {
-    await _db
-        .collection('carts')
-        .doc(currentUserId)
-        .collection('items')
-        .doc(itemId)
-        .delete();
+    await _db.collection('cart').doc(itemId).delete();
   }
 
+  // Add method to update cart item quantity
   Future<void> updateCartItemQuantity(String itemId, int quantity) async {
     if (quantity <= 0) {
       await removeFromCart(itemId);
     } else {
-      await _db
-          .collection('carts')
-          .doc(currentUserId)
-          .collection('items')
-          .doc(itemId)
-          .update({'quantity': quantity});
+      await _db.collection('cart').doc(itemId).update({
+        'quantity': quantity,
+      });
     }
   }
 
-  // Request methods
+  // Simplified Request methods
   Stream<List<Request>> get requests {
-    return _db.collection('requests').snapshots().map((snapshot) {
+    return _db.collection('requests')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
       return snapshot.docs
-          .map((doc) => Request.fromFirestore(doc.data(), doc.id))
+          .map((doc) => Request.fromMap(doc.id, doc.data()))
           .toList();
     });
   }
 
-  Future<void> addRequest(String productName) async {
+  Future<void> addRequest(Product product) async {
     await _db.collection('requests').add({
-      'productName': productName,
-      'userId': currentUserId,
+      'productId': product.id,
+      'productName': product.name,
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'pending',
     });
+  }
+
+  // Simplified Order methods
+  Stream<List<custom.Order>> get orders {
+    return _db.collection('orders')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => custom.Order.fromMap(doc.id, doc.data()))
+          .toList();
+    });
+  }
+
+  Future<void> placeOrder(List<CartItem> items, String roomNumber) async {
+    final total = items.fold<double>(
+      0,
+      (sum, item) => sum + (item.product.price * item.quantity),
+    );
+
+    // Create order with simplified structure
+    await _db.collection('orders').add({
+      'items': items.map((item) => {
+        'productId': item.product.id,
+        'productName': item.product.name,
+        'price': item.product.price,
+        'quantity': item.quantity,
+      }).toList(),
+      'roomNumber': roomNumber,
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'pending',
+      'total': total,
+    });
+
+    // Clear cart after order is placed
+    final batch = _db.batch();
+    final cartDocs = await _db.collection('cart').get();
+    for (var doc in cartDocs.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
   }
 }

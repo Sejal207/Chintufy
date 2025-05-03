@@ -18,6 +18,14 @@ class CartItem {
       quantity: data['quantity'],
     );
   }
+   factory CartItem.fromMap(String id, Map<String, dynamic> data) {
+    return CartItem(
+      id: id,
+      product: Product.fromFirestore(data['product'] as Map<String, dynamic>, id),
+      quantity: data['quantity'] as int,
+    );
+  }
+
 
   Map<String, dynamic> toFirestore() {
     return {
@@ -27,3 +35,8 @@ class CartItem {
     };
   }
 }
+
+
+
+
+

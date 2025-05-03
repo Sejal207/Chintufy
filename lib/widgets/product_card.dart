@@ -215,6 +215,7 @@ class ProductCard extends StatelessWidget {
   void _showProductDetails(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final theme = Theme.of(context);
+    final databaseService = Provider.of<DatabaseService>(context, listen: false);
     
     showModalBottomSheet(
       context: context,
@@ -306,6 +307,7 @@ class ProductCard extends StatelessWidget {
                           ? ElevatedButton.icon(
                               onPressed: () {
                                 Navigator.pop(context);
+                                databaseService.addToCart(product);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Added to cart')),
                                 );
@@ -319,6 +321,7 @@ class ProductCard extends StatelessWidget {
                           : OutlinedButton.icon(
                               onPressed: () {
                                 Navigator.pop(context);
+                                databaseService.addRequest(product);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(content: Text('Item requested')),
                                 );

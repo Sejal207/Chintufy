@@ -35,4 +35,15 @@ class Product {
       'imageUrl': imageUrl,
     };
   }
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'stock': stock,
+      'imageUrl': imageUrl,
+    };
+  }
 }
