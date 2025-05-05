@@ -1,0 +1,2 @@
+/home/gaurav/apps/Chintufy/android/app/.cxx/RelWithDebInfo/04hx4i2r/x86_64/CMakeFiles/edit_cache.dir
+/home/gaurav/apps/Chintufy/android/app/.cxx/RelWithDebInfo/04hx4i2r/x86_64/CMakeFiles/rebuild_cache.dir

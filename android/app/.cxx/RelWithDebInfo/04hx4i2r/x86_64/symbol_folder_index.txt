@@ -1,0 +1,1 @@
+/home/gaurav/apps/Chintufy/build/app/intermediates/cxx/RelWithDebInfo/04hx4i2r/obj/x86_64

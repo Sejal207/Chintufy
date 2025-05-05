@@ -7,6 +7,8 @@ import 'services/database_service.dart';
 import 'services/firebase_storage_service.dart';
 import 'pages/signup_page.dart';
 import 'pages/homepage.dart';
+import 'models/cart.dart';
+import 'models/user_profile.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +41,12 @@ class MyApp extends StatelessWidget {
         ),
         Provider<FirebaseStorageService>(
           create: (_) => FirebaseStorageService(),
+        ),
+        ChangeNotifierProvider<CartModel>(
+          create: (_) => CartModel(),
+        ),
+        ChangeNotifierProvider<UserProfileModel>(
+          create: (_) => UserProfileModel(),
         ),
       ],
       child: MaterialApp(

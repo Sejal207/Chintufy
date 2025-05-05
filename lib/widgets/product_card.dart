@@ -16,7 +16,12 @@ class ProductCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      elevation: 2,
+      elevation: 1,
+      color: Colors.grey[50],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(color: Colors.grey[200]!, width: 0.5),
+      ),
       child: InkWell(
         onTap: () => _showProductDetails(context),
         child: Column(
@@ -38,6 +43,7 @@ class ProductCard extends StatelessWidget {
                     product.name,
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: Colors.black87,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -47,7 +53,7 @@ class ProductCard extends StatelessWidget {
                   Text(
                     '₹${product.price.toStringAsFixed(2)}',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.green.shade700,
+                      color: Colors.black,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -65,7 +71,7 @@ class ProductCard extends StatelessWidget {
                             Icon(
                               Icons.inventory,
                               size: 14,
-                              color: product.stock > 0 ? Colors.green : Colors.red,
+                              color: product.stock > 0 ? Colors.black54 : Colors.grey[400],
                             ),
                             const SizedBox(width: 2),
                             Flexible(
@@ -73,7 +79,7 @@ class ProductCard extends StatelessWidget {
                                 product.stock > 0 ? '${product.stock}' : 'Out',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: product.stock > 0 ? Colors.green : Colors.red,
+                                  color: product.stock > 0 ? Colors.black54 : Colors.grey[400],
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -129,7 +135,7 @@ class ProductCard extends StatelessWidget {
         constraints: const BoxConstraints(),
         icon: Icon(icon, size: 14),
         onPressed: enabled ? onPressed : null,
-        color: enabled ? null : Colors.grey,
+        color: enabled ? Colors.black54 : Colors.grey[300],
       ),
     );
   }
@@ -137,17 +143,17 @@ class ProductCard extends StatelessWidget {
   Widget _buildPopupMenu(BuildContext context, DatabaseService databaseService) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: const Icon(Icons.more_vert, size: 16),
-      tooltip: 'More options', 
+      icon: const Icon(Icons.more_vert, size: 16, color: Colors.black54),
+      tooltip: 'More options',
       itemBuilder: (context) => [
         const PopupMenuItem(
           value: 'delete',
           height: 36, // Smaller height
           child: Row(
             children: [
-              Icon(Icons.delete, color: Colors.red, size: 16),
+              Icon(Icons.delete, color: Colors.black54, size: 16),
               SizedBox(width: 8),
-              Text('Delete', style: TextStyle(fontSize: 14)),
+              Text('Delete', style: TextStyle(fontSize: 14, color: Colors.black87)),
             ],
           ),
         ),
@@ -158,7 +164,10 @@ class ProductCard extends StatelessWidget {
           if (confirmed == true) {
             await databaseService.deleteProduct(product.id);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${product.name} deleted')),
+              SnackBar(
+                content: Text('${product.name} deleted'),
+                backgroundColor: Colors.black87,
+              ),
             );
           }
         }
@@ -170,16 +179,20 @@ class ProductCard extends StatelessWidget {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete ${product.name}?'),
+        backgroundColor: Colors.grey[50],
+        title: const Text('Confirm Delete', style: TextStyle(color: Colors.black87)),
+        content: Text(
+          'Are you sure you want to delete ${product.name}?',
+          style: TextStyle(color: Colors.black54),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Cancel', style: TextStyle(color: Colors.black54)),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.black)),
           ),
         ],
       ),
@@ -189,24 +202,33 @@ class ProductCard extends StatelessWidget {
   Widget _buildProductImage() {
     if (product.imageUrl.isEmpty) {
       return Container(
-        color: Colors.grey[200],
+        color: Colors.grey[100],
+        width: double.infinity,
         child: const Center(
-          child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey),
+          child: Icon(Icons.image_not_supported, size: 40, color: Colors.black26),
         ),
       );
     }
 
-    return CachedNetworkImage(
-      imageUrl: product.imageUrl,
-      fit: BoxFit.cover,
-      placeholder: (context, url) => Container(
-        color: Colors.grey[200],
-        child: const Center(child: CircularProgressIndicator()),
-      ),
-      errorWidget: (context, url, error) => Container(
-        color: Colors.grey[200],
-        child: const Center(
-          child: Icon(Icons.error_outline, size: 40, color: Colors.red),
+    return SizedBox(
+      width: double.infinity,
+      child: CachedNetworkImage(
+        imageUrl: product.imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (context, url) => Container(
+          color: Colors.grey[100],
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.black38),
+              strokeWidth: 2,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          color: Colors.grey[100],
+          child: const Center(
+            child: Icon(Icons.error_outline, size: 40, color: Colors.black26),
+          ),
         ),
       ),
     );
@@ -216,10 +238,11 @@ class ProductCard extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final theme = Theme.of(context);
     final databaseService = Provider.of<DatabaseService>(context, listen: false);
-    
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Colors.grey[50],
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -244,7 +267,7 @@ class ProductCard extends StatelessWidget {
                         height: 4,
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade300,
+                          color: Colors.grey[300],
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -266,6 +289,7 @@ class ProductCard extends StatelessWidget {
                       product.name,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -277,7 +301,7 @@ class ProductCard extends StatelessWidget {
                         Text(
                           '₹${product.price.toStringAsFixed(2)}',
                           style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.green.shade700,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -289,14 +313,18 @@ class ProductCard extends StatelessWidget {
                     // Description
                     Text(
                       'Description',
-                      style: theme.textTheme.titleMedium,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: Colors.black87,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       product.description.isNotEmpty 
                           ? product.description 
                           : 'No description available.',
-                      style: theme.textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.black54,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     
@@ -309,13 +337,19 @@ class ProductCard extends StatelessWidget {
                                 Navigator.pop(context);
                                 databaseService.addToCart(product);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Added to cart')),
+                                  const SnackBar(
+                                    content: Text('Added to cart'),
+                                    backgroundColor: Colors.black87,
+                                  ),
                                 );
                               },
                               icon: const Icon(Icons.shopping_cart),
                               label: const Text('Add to Cart'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
+                                backgroundColor: Colors.black87,
+                                foregroundColor: Colors.white,
+                                elevation: 0,
                               ),
                             )
                           : OutlinedButton.icon(
@@ -323,13 +357,18 @@ class ProductCard extends StatelessWidget {
                                 Navigator.pop(context);
                                 databaseService.addRequest(product);
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Item requested')),
+                                  const SnackBar(
+                                    content: Text('Item requested'),
+                                    backgroundColor: Colors.black87,
+                                  ),
                                 );
                               },
                               icon: const Icon(Icons.notification_add),
                               label: const Text('Request Item'),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 12),
+                                foregroundColor: Colors.black87,
+                                side: const BorderSide(color: Colors.black54, width: 1),
                               ),
                             ),
                     ),
@@ -347,9 +386,9 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildStockChip(BuildContext context) {
     final isInStock = product.stock > 0;
-    final color = isInStock ? Colors.green : Colors.red;
+    final color = isInStock ? Colors.black54 : Colors.grey[400]!;
     final text = isInStock ? 'In Stock (${product.stock})' : 'Out of Stock';
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

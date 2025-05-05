@@ -18,7 +18,21 @@ class DatabaseService {
 
   // Add a new product
   Future<void> addProduct(Product product) async {
-    await _db.collection('products').add(product.toFirestore());
+    try {
+      final docRef = _db.collection('products').doc();
+      await docRef.set({
+        'id': docRef.id,
+        'name': product.name,
+        'description': product.description,
+        'price': product.price,
+        'stock': product.stock,
+        'imageUrl': product.imageUrl,
+        'category': product.category,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to add product: $e');
+    }
   }
 
   // Update product stock
@@ -88,6 +102,21 @@ class DatabaseService {
     }
   }
 
+  // Add method to clear the cart
+  Future<void> clearCart() async {
+    try {
+      // Get all cart items
+      final cartDocs = await _db.collection('cart').get();
+      
+      // Delete each cart item
+      for (var doc in cartDocs.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      throw Exception('Failed to clear cart: $e');
+    }
+  }
+
   // Simplified Request methods
   Stream<List<Request>> get requests {
     return _db.collection('requests')
@@ -107,6 +136,17 @@ class DatabaseService {
       'timestamp': FieldValue.serverTimestamp(),
       'status': 'pending',
     });
+  }
+
+  Future<void> updateRequestStatus(String requestId, String newStatus) async {
+    try {
+      await _db
+          .collection('requests')
+          .doc(requestId)
+          .update({'status': newStatus});
+    } catch (e) {
+      throw Exception('Failed to update request status: $e');
+    }
   }
 
   // Simplified Order methods
@@ -148,5 +188,16 @@ class DatabaseService {
       batch.delete(doc.reference);
     }
     await batch.commit();
+  }
+
+  Future<void> updateOrderStatus(String orderId, String newStatus) async {
+    try {
+      await _db
+          .collection('orders')
+          .doc(orderId)
+          .update({'status': newStatus});
+    } catch (e) {
+      throw Exception('Failed to update order status: $e');
+    }
   }
 }
