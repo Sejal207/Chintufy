@@ -1,3 +1,4 @@
+import 'package:chintufy/pages/self_checkout_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
@@ -60,6 +61,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
         backgroundColor: Colors.black87,
+        toolbarHeight: 70,
         elevation: 0,
         title: _isSearching
             ? AnimatedBuilder(
@@ -87,10 +89,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 },
               )
             : const Text(
-                'Chintufy',
+                'InvenTree',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w300,
+                  fontSize: 32,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -103,8 +106,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 return ScaleTransition(scale: animation, child: child);
               },
               child: _isSearching
-                  ? const Icon(Icons.close, key: ValueKey('close'))
-                  : const Icon(Icons.search, key: ValueKey('search')),
+                  ? const Icon(Icons.close, color: Colors.white , key: ValueKey('close'))
+                  : const Icon(Icons.search,color: Colors.white , key: ValueKey('search')),
             ),
             tooltip: _isSearching ? 'Cancel' : 'Search',
             onPressed: _toggleSearch,
@@ -112,6 +115,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           // Requested Items button
           IconButton(
             icon: const Icon(Icons.list_alt),
+            color: Colors.white ,
             tooltip: 'Requested Items',
             onPressed: () {
               Navigator.push(
@@ -126,6 +130,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.shopping_cart),
             tooltip: 'Cart',
+            color: Colors.white ,
             onPressed: () {
               Navigator.push(
                 context,
@@ -141,6 +146,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           IconButton(
             icon: const Icon(Icons.receipt_long),
             tooltip: 'Orders',
+            color: Colors.white ,
             onPressed: () {
               Navigator.push(
                 context,
@@ -308,32 +314,52 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Widget? _buildFloatingActionButton() {
-    // Show FAB only when not searching
     if (_isSearching) return null;
     
-    return FloatingActionButton(
-      onPressed: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => Container(
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        // Self Checkout FAB
+        FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SelfCheckoutPage(),
               ),
-            ),
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: AddProductDialog(),
-          ),
-        );
-      },
-      backgroundColor: Colors.black,
-      child: const Icon(Icons.add, color: Colors.white),
-      elevation: 2,
+            );
+          },
+          heroTag: 'selfCheckout',
+          backgroundColor: Colors.blue[700],
+          child: const Icon(Icons.contactless, color: Colors.white),
+        ),
+        const SizedBox(height: 16),
+        // Existing Add Product FAB
+        FloatingActionButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
+                ),
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
+                ),
+                child: AddProductDialog(),
+              ),
+            );
+          },
+          heroTag: 'addProduct',
+          backgroundColor: Colors.black,
+          child: const Icon(Icons.add, color: Colors.white),
+        ),
+      ],
     );
   }
 

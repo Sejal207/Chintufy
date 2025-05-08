@@ -44,6 +44,7 @@ class ProductCard extends StatelessWidget {
                     style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
+                      fontSize: 22.0, 
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -55,6 +56,7 @@ class ProductCard extends StatelessWidget {
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.black,
                       fontWeight: FontWeight.bold,
+                      fontSize: 18.0, 
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -70,15 +72,15 @@ class ProductCard extends StatelessWidget {
                           children: [
                             Icon(
                               Icons.inventory,
-                              size: 14,
+                              size: 20, // Increased from 14 to 20
                               color: product.stock > 0 ? Colors.black54 : Colors.grey[400],
                             ),
-                            const SizedBox(width: 2),
+                            const SizedBox(width: 4), // Increased from 2 to 4 for better spacing
                             Flexible(
                               child: Text(
                                 product.stock > 0 ? '${product.stock}' : 'Out',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 16, // Increased from 12 to 16
                                   color: product.stock > 0 ? Colors.black54 : Colors.grey[400],
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -128,12 +130,12 @@ class ProductCard extends StatelessWidget {
 
   Widget _buildIconButton(IconData icon, VoidCallback? onPressed, {bool enabled = true}) {
     return SizedBox(
-      width: 24,
-      height: 24,
+      width: 32,
+      height: 32,
       child: IconButton(
         padding: EdgeInsets.zero,
         constraints: const BoxConstraints(),
-        icon: Icon(icon, size: 14),
+        icon: Icon(icon, size: 24), // Increased from 14 to 18
         onPressed: enabled ? onPressed : null,
         color: enabled ? Colors.black54 : Colors.grey[300],
       ),
@@ -143,7 +145,7 @@ class ProductCard extends StatelessWidget {
   Widget _buildPopupMenu(BuildContext context, DatabaseService databaseService) {
     return PopupMenuButton<String>(
       padding: EdgeInsets.zero,
-      icon: const Icon(Icons.more_vert, size: 16, color: Colors.black54),
+      icon: const Icon(Icons.more_vert, size: 24, color: Colors.black54), // Increased from 16 to 20
       tooltip: 'More options',
       itemBuilder: (context) => [
         const PopupMenuItem(
